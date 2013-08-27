@@ -1,5 +1,7 @@
-CPPFLAGS = -g -fPIC -I.
-LDFLAGS = -Wl,-rpath -Wl,.
+PREFIX = /usr
+PROTODIR = /usr
+CPPFLAGS = -g -fPIC -I. -I$(PROTODIR)/include
+LDFLAGS = -Wl,-rpath,$(PROTODIR)/lib -Wl,-rpath,. -L$(PROTODIR)/lib
 CURDIR = .
 
 all: jansson2pb-util jansson2pb-test libjansson2pb.so 
@@ -9,6 +11,18 @@ test: jansson2pb-test
 
 clean:
 	-rm -f test/test.pb.h test/test.pb.cc *.o *.so *.a libjansson2pb.so.* jansson2pb-util jansson2pb-test
+
+install: libjansson2pb.a libjansson2pb.so
+	mkdir -p ${PREFIX}/include/3party
+	mkdir -p ${PREFIX}/lib
+	rm -f ${PREFIX}/lib/libjansson2pb.a
+	rm -f ${PREFIX}/lib/libjansson2pb.so
+	cp libjansson2pb.a ${PREFIX}/lib/libjansson2pb-0.2-4.a
+	ln -s ${PREFIX}/lib/libjansson2pb-0.2-4.a ${PREFIX}/lib/libjansson2pb.a
+	cp libjansson2pb.so ${PREFIX}/lib/libjansson2pb-0.2-4.so
+	ln -s ${PREFIX}/lib/libjansson2pb-0.2-4.so ${PREFIX}/lib/libjansson2pb.so
+	cp 3party/*.h ${PREFIX}/include/3party
+	cp src/*.h ${PREFIX}/include
 
 libjansson2pb.a: jansson2pb.o dump.o error.o hashtable.o load.o memory.o pack_unpack.o strbuffer.o strconv.o utf.o value.o
 	ar cr libjansson2pb.a $^
@@ -50,7 +64,7 @@ value.o: src/value.c
 	$(CXX) $(CPPFLAGS) -c -I$(CURDIR)/src -o $@ $^
 
 test/test.pb.cc: test/test.proto
-	protoc -I$(CURDIR) --cpp_out=$(CURDIR) $(CURDIR)/$^
+	$(PROTODIR)/bin/protoc -I$(CURDIR) --cpp_out=$(CURDIR) $(CURDIR)/$^
 
 test.pb.o: test/test.pb.cc
 	$(CXX) $(CPPFLAGS) -c -o $@ $^
