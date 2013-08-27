@@ -4,7 +4,7 @@ CPPFLAGS = -g -fPIC -I. -I$(PROTODIR)/include
 LDFLAGS = -Wl,-rpath,$(PROTODIR)/lib -Wl,-rpath,. -L$(PROTODIR)/lib
 CURDIR = .
 
-all: jansson2pb-util jansson2pb-test libjansson2pb.so 
+all: jansson2pb-util jansson2pb-test jansson2pb-stress libjansson2pb.so 
 
 test: jansson2pb-test
 	./jansson2pb-test
@@ -76,4 +76,8 @@ jansson2pb-util: util/main.cpp test.pb.o libjansson2pb.a
 jansson2pb-test: test/test.cpp test.pb.o libjansson2pb.a
 	$(CXX) $(CPPFLAGS) -c -I$(CURDIR) -o test.o test/test.cpp
 	$(CXX) $(LDFLAGS) -o jansson2pb-test test.o test.pb.o libjansson2pb.a -lprotobuf
+
+jansson2pb-stress: test/stress.cpp test.pb.o libjansson2pb.a
+	$(CXX) $(CPPFLAGS) -c -I$(CURDIR) -o stress.o test/stress.cpp
+	$(CXX) $(LDFLAGS) -o jansson2pb-stress stress.o test.pb.o libjansson2pb.a -lprotobuf
 
